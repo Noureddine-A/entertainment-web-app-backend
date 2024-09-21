@@ -20,4 +20,10 @@ router.post(
   authController.signUpUser
 );
 
+router.post(
+  "/login",
+  check(["username", "password"]).notEmpty().withMessage("Can't be empty."),
+  authController.loginUser
+);
+
 module.exports = router;

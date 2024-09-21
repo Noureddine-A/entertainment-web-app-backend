@@ -1,5 +1,6 @@
 const { validationResult } = require("express-validator");
 const bcrypt = require("bcrypt");
+const jwtoken = require("jsonwebtoken");
 
 const User = require("../models/user");
 
@@ -9,12 +10,7 @@ exports.signUpUser = (req, res, next) => {
   let error = [];
 
   if (result.errors.length > 0) {
-    for (let i = 0; i < result.errors.length; i++) {
-      error.push({
-        value: result.errors[i].path,
-        message: result.errors[i].msg,
-      });
-    }
+    error = checkValidationResult(result.errors);
     return res.status(422).json({ error });
   }
 
@@ -32,10 +28,62 @@ exports.signUpUser = (req, res, next) => {
         });
       } else {
         error.push({ value: "username", message: "User already exists." });
-        res.status(422).json({error});
+        res.status(422).json({ error });
       }
     })
     .catch((error) => {
       next(error);
     });
 };
+
+exports.loginUser = (req, res, next) => {
+  const username = req.body.username;
+  const password = req.body.password;
+  let error = [];
+
+  const result = validationResult(req);
+
+  if (result.errors.length > 0) {
+    error = checkValidationResult(result.errors);
+    return res.status(422).json({ error });
+  }
+
+  User.findOne({ username: username })
+    .then((user) => {
+      if (user) {
+        bcrypt.compare(password, user.password).then((isSame) => {
+          if (!isSame) {
+            error.push({ value: "password", message: "Incorrect password." });
+            return res.status(422).json({ error });
+          }
+
+          const token = jwtoken.sign(
+            { user: user },
+            "asupersecretkeynoonewilleverfindout"
+          );
+
+          return res
+            .status(200)
+            .json({
+              message: "User  successfully logged in.",
+              token: token,
+            });
+        });
+      }
+    })
+    .catch((error) => {
+      next(error);
+    });
+};
+
+function checkValidationResult(validationResult) {
+  let errorList = [];
+  for (let i = 0; i < validationResult.length; i++) {
+    errorList.push({
+      value: validationResult[i].path,
+      message: validationResult[i].msg,
+    });
+  }
+
+  return errorList;
+}
