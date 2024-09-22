@@ -16,7 +16,9 @@ exports.getTrendingMovies = (req, res, next) => {
         .json()
         .then((result) => {
           const slicedMovieList = result.results.slice(0, 4);
-          trendingList = appendList(slicedMovieList);
+
+          let slicedMovieListWithGenre = addGenre(slicedMovieList, "Movie");
+          trendingList = appendList(slicedMovieListWithGenre);
         })
         .then(
           fetch("https://api.themoviedb.org/3/tv/popular", {
@@ -28,7 +30,13 @@ exports.getTrendingMovies = (req, res, next) => {
           }).then((response) => {
             response.json().then((result) => {
               const slicedTvShowList = result.results.slice(0, 4);
-              let trendingTvShows = appendList(slicedTvShowList);
+
+              let slicedTVShowListWithGenre = addGenre(
+                slicedTvShowList,
+                "TV Series"
+              );
+
+              let trendingTvShows = appendList(slicedTVShowListWithGenre);
 
               let trending = trendingList.concat(trendingTvShows);
 
@@ -49,4 +57,14 @@ function appendList(list) {
   }
 
   return resultList;
+}
+
+function addGenre(list, genre) {
+  let listWithGenre = [];
+  for (let i = 0; i < list.length; i++) {
+    let newObj = { ...list[i], genre: genre };
+    listWithGenre.push(newObj);
+  }
+
+  return listWithGenre;
 }
