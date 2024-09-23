@@ -4,7 +4,7 @@ require("dotenv").config();
 exports.getTrendingMovies = (req, res, next) => {
   let trendingList = [];
 
-  fetch("https://api.themoviedb.org/3/movie/popular", {
+  fetch("https://api.themoviedb.org/3/movie/now_playing", {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -21,7 +21,7 @@ exports.getTrendingMovies = (req, res, next) => {
           trendingList = appendList(slicedMovieListWithGenre);
         })
         .then(
-          fetch("https://api.themoviedb.org/3/tv/popular", {
+          fetch("https://api.themoviedb.org/3/tv/top_rated", {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
@@ -41,6 +41,53 @@ exports.getTrendingMovies = (req, res, next) => {
               let trending = trendingList.concat(trendingTvShows);
 
               return res.status(200).json({ trending });
+            });
+          })
+        );
+    })
+    .catch((error) => {
+      next(error);
+    });
+};
+
+exports.getRecommendations = (req, res, next) => {
+  let recommendedList = [];
+
+  fetch("https://api.themoviedb.org/3/movie/popular", {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + process.env.TMDB_API_KEY,
+    },
+  })
+    .then((response) => {
+      response
+        .json()
+        .then((recommendedMovies) => {
+          const slicedRecommendedMovies = recommendedMovies.results.slice(
+            0,
+            12
+          );
+          const slicedRecommendedMoviesWithGenre = addGenre(
+            slicedRecommendedMovies,
+            "Movie"
+          );
+          recommendedList = appendList(slicedRecommendedMoviesWithGenre);
+        })
+        .then(
+          fetch("https://api.themoviedb.org/3/tv/popular", {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + process.env.TMDB_API_KEY,
+            },
+          }).then((response) => {
+            response.json().then((recommendedTvSeries) => {
+              const sliced = recommendedTvSeries.results.slice(0, 12);
+              const slicedWithGenre = addGenre(sliced, "TV Series");
+              recommendedList = recommendedList.concat(slicedWithGenre);
+
+              return res.status(200).json({ recommendedList });
             });
           })
         );
