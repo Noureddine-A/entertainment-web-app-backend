@@ -97,6 +97,42 @@ exports.getRecommendations = (req, res, next) => {
     });
 };
 
+exports.getMovies = (req, res, next) => {
+  fetch("https://api.themoviedb.org/3/movie/popular", {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + process.env.TMDB_API_KEY,
+    },
+  })
+    .then((response) => {
+      response.json().then((result) => {
+        return res.status(200).json({ result });
+      });
+    })
+    .catch((error) => {
+      next(error);
+    });
+};
+
+exports.getTVSeries = (req, res, next) => {
+  fetch("https://api.themoviedb.org/3/tv/popular", {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + process.env.TMDB_API_KEY,
+    },
+  })
+    .then((response) => {
+      response.json().then((result) => {
+        return res.status(200).json({ result });
+      });
+    })
+    .catch((error) => {
+      next(error);
+    });
+};
+
 function appendList(list) {
   let resultList = [];
   for (let i = 0; i < list.length; i++) {
