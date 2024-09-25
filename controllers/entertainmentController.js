@@ -14,8 +14,8 @@ exports.getTrendingMovies = (req, res, next) => {
     .then((response) => {
       response
         .json()
-        .then((result) => {
-          const slicedMovieList = result.results.slice(0, 4);
+        .then((r) => {
+          const slicedMovieList = r.results.slice(0, 4);
 
           let slicedMovieListWithGenre = addGenre(slicedMovieList, "Movie");
           trendingList = appendList(slicedMovieListWithGenre);
@@ -28,8 +28,8 @@ exports.getTrendingMovies = (req, res, next) => {
               Authorization: "Bearer " + process.env.TMDB_API_KEY,
             },
           }).then((response) => {
-            response.json().then((result) => {
-              const slicedTvShowList = result.results.slice(0, 4);
+            response.json().then((r) => {
+              const slicedTvShowList = r.results.slice(0, 4);
 
               let slicedTVShowListWithGenre = addGenre(
                 slicedTvShowList,
@@ -38,9 +38,9 @@ exports.getTrendingMovies = (req, res, next) => {
 
               let trendingTvShows = appendList(slicedTVShowListWithGenre);
 
-              let trending = trendingList.concat(trendingTvShows);
+              let result = trendingList.concat(trendingTvShows);
 
-              return res.status(200).json({ trending });
+              return res.status(200).json({ result });
             });
           })
         );
@@ -86,8 +86,9 @@ exports.getRecommendations = (req, res, next) => {
               const sliced = recommendedTvSeries.results.slice(0, 12);
               const slicedWithGenre = addGenre(sliced, "TV Series");
               recommendedList = recommendedList.concat(slicedWithGenre);
+              const result = recommendedList;
 
-              return res.status(200).json({ recommendedList });
+              return res.status(200).json({ result });
             });
           })
         );
