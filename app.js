@@ -6,6 +6,7 @@ const bodyParser = require("body-parser");
 
 const authRouter = require("./routes/authRouter");
 const entertainmentRouter = require("./routes/entertainmentRouter");
+const userRouter = require('./routes/userRouter');
 
 app.use(bodyParser.json());
 
@@ -20,6 +21,7 @@ app.use((req, res, next) => {
 
 app.use("/auth", authRouter);
 app.use("/entertainment", entertainmentRouter);
+app.use('/bookmark', userRouter);
 
 app.use((err, req, res, next) => {
   let error = new Error();

@@ -1,4 +1,6 @@
 const fetch = require("node-fetch");
+
+const User = require('../models/user');
 require("dotenv").config();
 
 exports.getTrendingMovies = (req, res, next) => {
@@ -151,4 +153,8 @@ function addGenre(list, genre) {
   }
 
   return listWithGenre;
+}
+
+function checkBookmark(list) {
+ // TODO: Check whether the content exists in the favourites list of the user
 }
