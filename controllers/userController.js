@@ -1,10 +1,16 @@
 const User = require("../models/user");
+require("dotenv").config();
 
 exports.saveBookmark = (req, res, next) => {
   User.findById(req.userId)
     .then((user) => {
       if (user) {
-        user.favourites.push({ name: req.body.title, genre: req.body.genre });
+        user.favourites.push({
+          name: req.body.title,
+          genre: req.body.genre,
+          posterPath: req.body.posterPath,
+          releaseYear: req.body.releaseYear,
+        });
         user.save().then((result) => {
           res
             .status(200)
@@ -17,30 +23,33 @@ exports.saveBookmark = (req, res, next) => {
     });
 };
 
-exports.getBookmarks = (req, res, next) => {
+exports.deleteBookmark = (req, res, next) => {
   User.findById(req.userId).then((user) => {
     if (user) {
-      const bookmarks = user.favourites;
-      let result = [];
+      let updatedList = user.favourites.filter((item) => {
+        return item.name !== req.body.title;
+      });
 
-      for (let i = 0; i < bookmarks.length; i++) {
-        if (bookmarks[i].genre === "movie") {
-          fetch(
-            "https://api.themoviedb.org/3/search/movie?query=" +
-              bookmarks[i].title
-          ).then((r) => {
-            return result.push({ ...r, genre: "Movie" });
-          });
-        }
+      user.favourites = updatedList;
 
-        fetch(
-          "https://api.themoviedb.org/3/search/tv?query=" + bookmarks[i].title
-        ).then((r) => {
-          return result.push({ ...r, genre: "TV Series" });
-        });
-      }
-
-      res.status(200).json({ result });
+      user.save().then((r) => {
+        res
+          .status(200)
+          .json({ message: "Successfully removed bookmark item." });
+      });
     }
   });
+};
+
+exports.getBookmarks = (req, res, next) => {
+  User.findById(req.userId)
+    .then((user) => {
+      if (user) {
+        const result = user.favourites;
+        res.status(200).json({ result });
+      }
+    })
+    .catch((error) => {
+      next(error);
+    });
 };

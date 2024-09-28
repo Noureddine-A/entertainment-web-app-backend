@@ -18,6 +18,14 @@ const userSchema = new mongoose.Schema({
       genre: {
         type: String,
         required: true
+      },
+      posterPath: {
+        type: String,
+        required: true
+      },
+      releaseYear: {
+        type: String,
+        required: true
       }
     },
   ],

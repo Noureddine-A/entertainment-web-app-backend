@@ -1,12 +1,13 @@
-const express = require('express');
+const express = require("express");
 
-const isAuth = require('../util/is-auth');
+const isAuth = require("../util/is-auth");
 
 const router = express.Router();
 
-const userController = require('../controllers/userController');
+const userController = require("../controllers/userController");
 
-router.post('/save', isAuth, userController.saveBookmark);
-router.get('/', isAuth, userController.getBookmarks);
+router.post("/save", isAuth, userController.saveBookmark);
+router.post("/delete", isAuth, userController.deleteBookmark);
+router.get("/bookmark", isAuth, userController.getBookmarks);
 
 module.exports = router;

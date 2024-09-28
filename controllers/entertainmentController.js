@@ -1,6 +1,6 @@
 const fetch = require("node-fetch");
 
-const User = require('../models/user');
+const User = require("../models/user");
 require("dotenv").config();
 
 exports.getTrendingMovies = (req, res, next) => {
@@ -42,7 +42,9 @@ exports.getTrendingMovies = (req, res, next) => {
 
               let result = trendingList.concat(trendingTvShows);
 
-              return res.status(200).json({ result });
+              checkBookmark(result, req.userId, res);
+
+              // return res.status(200).json({ result });
             });
           })
         );
@@ -88,9 +90,8 @@ exports.getRecommendations = (req, res, next) => {
               const sliced = recommendedTvSeries.results.slice(0, 12);
               const slicedWithGenre = addGenre(sliced, "TV Series");
               recommendedList = recommendedList.concat(slicedWithGenre);
-              const result = recommendedList;
 
-              return res.status(200).json({ result });
+              checkBookmark(recommendedList, req.userId, res);
             });
           })
         );
@@ -109,8 +110,8 @@ exports.getMovies = (req, res, next) => {
     },
   })
     .then((response) => {
-      response.json().then((result) => {
-        return res.status(200).json({ result });
+      response.json().then((r) => {
+        checkBookmark(r.results, req.userId, res);
       });
     })
     .catch((error) => {
@@ -128,7 +129,7 @@ exports.getTVSeries = (req, res, next) => {
   })
     .then((response) => {
       response.json().then((result) => {
-        return res.status(200).json({ result });
+        checkBookmark(result.results, req.userId, res);
       });
     })
     .catch((error) => {
@@ -155,6 +156,24 @@ function addGenre(list, genre) {
   return listWithGenre;
 }
 
-function checkBookmark(list) {
- // TODO: Check whether the content exists in the favourites list of the user
+async function checkBookmark(list, userId, res) {
+  User.findById(userId).then((user) => {
+    if (user) {
+      const updatedList = list.map((item) => {
+        let newObj = { ...item, isBookmarked: false };
+        return newObj;
+      });
+
+     user.favourites.forEach(a => {
+      updatedList.forEach(b => {
+        if(a.name === b.name || a.name === b.original_title || a.name === b.original_name) {
+          return b.isBookmarked = true;
+        }
+      })
+     })
+     const result = updatedList;
+
+      res.status(200).json({ result });
+    }
+  });
 }
