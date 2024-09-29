@@ -59,7 +59,10 @@ exports.loginUser = (req, res, next) => {
 
           const token = jwtoken.sign(
             { user: user },
-            "asupersecretkeynoonewilleverfindout"
+            "asupersecretkeynoonewilleverfindout",
+            {
+              expiresIn: "1h"
+            }
           );
 
           return res
